@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2>Campus Exchange Items</h2>
+        <p class="text-muted">Buy, sell, or exchange items with other students.</p>
+    </div>
+    <div class="col-md-4">
+        <form action="{% url 'index' %}" method="get" class="d-flex">
+            <input class="form-control me-2" type="search" name="q" value="{{ query }}" placeholder="Search items..." aria-label="Search">
+            <button class="btn btn-outline-primary" type="submit">Search</button>
+        </form>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url 'index' %}" class="btn btn-sm {% if category_id == 0 %}btn-primary{% else %}btn-outline-secondary{% endif %}">All Categories</a>
+            {% for cat in categories %}
+                <a href="{% url 'index' %}?category={{ cat.id }}" class="btn btn-sm {% if category_id == cat.id %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                    {{ cat.name }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+    {% for item in items %}
+        <div class="col">
+            <div class="card h-100">
+                {% if item.image %}
+                    <img src="{{ item.image.url }}" class="card-img-top item-img" alt="{{ item.title }}">
+                {% else %}
+                    <div class="bg-light text-center d-flex align-items-center justify-content-center item-img text-muted">
+                        <i class="bi bi-image" style="font-size: 3rem;"></i>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title text-truncate mb-0" title="{{ item.title }}">{{ item.title }}</h5>
+                    </div>
+                    <span class="badge bg-secondary mb-2">{{ item.category.name }}</span>
+                    <p class="card-text text-muted small text-truncate">{{ item.description }}</p>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <h6 class="mb-0 text-success">
+                            {% if item.price == 0 %}
+                                <i class="bi bi-arrow-left-right"></i> Exchange
+                            {% else %}
+                                ${{ item.price }}
+                            {% endif %}
+                        </h6>
+                        <a href="{% url 'item_detail' item.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent py-2">
+                    <small class="text-muted"><i class="bi bi-person"></i> {{ item.owner.username }}</small>
+                    <small class="text-muted float-end">{{ item.created_at|date:"M d" }}</small>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+            <h4 class="mt-3 text-muted">No items found</h4>
+            {% if query or category_id > 0 %}
+                <p><a href="{% url 'index' %}" class="text-decoration-none">Clear search filters</a></p>
+            {% else %}
+                <p>Be the first to <a href="{% url 'item_create' %}" class="text-decoration-none">post an item</a>!</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
