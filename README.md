@@ -1,32 +1,66 @@
-# Campus Exchange - Django Term Project
+# Campus Exchange (Üniversite İçi İkinci El / Takas Platformu)
 
-This is a full-stack Django web application designed for a university term project. It allows students to buy, sell, or exchange items within the campus. 
+Merhaba! Bu proje, üniversite öğrencileri arasında kitap, elektronik veya ev eşyası gibi ürünlerin alım-satımını ve takasını kolaylaştırmak için yapılmış bir web sitesidir. 
 
-## Features (According to Grading Scheme)
+**Eğer kodlamadan hiç anlamıyorsan endişelenme!** Aşağıdaki adımları sırasıyla okuyarak bu siteyi kendi bilgisayarında çok rahat bir şekilde çalıştırabilirsin.
 
-- **Core Functionality**: Full CRUD operations for Items (Create, Read, Update, Delete). Uses Django MVT architecture.
-- **Database Design**: Three main models: `User` (built-in), `Category`, `Item`, and `Comment`. Demonstrates use of Foreign Keys and constraints.
-- **Frontend & UX**: Built with HTML, CSS, and Bootstrap 5 for a clean, responsive, and mobile-friendly user interface.
-- **Advanced Features**:
-  1. **Authentication System**: Full login/signup/logout implementation.
-  2. **Authorization**: Only item owners can edit or delete their items.
-  3. **Search & Filter**: Users can search for items by title/description or filter by category.
-- **Code Quality**: Modular views, clean templates with template inheritance, and well-structured code.
+---
 
-## Setup Instructions
+## 🛠️ Kurulum Adımları (Adım Adım Rehber)
 
-1. Ensure Python 3.10+ is installed on your system.
-2. Open terminal in the project directory.
-3. Activate the virtual environment:
-   - Windows: `.\venv\Scripts\activate`
-   - Mac/Linux: `source venv/bin/activate`
-4. Run migrations: `python manage.py migrate`
-5. Create a superuser (optional, for admin access): `python manage.py createsuperuser`
-6. Start the development server: `python manage.py runserver`
-7. Open `http://127.0.0.1:8000/` in your browser.
+Siteyi kendi bilgisayarında çalıştırmak için önce bazı programların bilgisayarında yüklü olması gerekiyor.
 
-## Database Schema / Models
+### Adım 1: Python'ı Yükle
+Eğer bilgisayarında Python yüklü değilse, sitenin altyapısı çalışmaz.
+1. [Python İndirme Sayfası](https://www.python.org/downloads/)'na gir ve en güncel sürümü indir.
+2. İndirdiğin kurulum dosyasını çalıştır.
+3. **ÇOK ÖNEMLİ:** Kurulum ekranının en altındaki **"Add python.exe to PATH"** yazan kutucuğu mutlaka işaretle! Sonra "Install Now" diyerek kur.
 
-- **Category**: Classifies items (e.g., Electronics, Books).
-- **Item**: The main product being sold/exchanged. Contains title, price, description, and an image field.
-- **Comment**: Allows users to ask questions on an item page.
+### Adım 2: Projeyi Bilgisayarına İndir
+1. Bu sayfanın sağ üst köşesindeki yeşil renkli **"<> Code"** butonuna tıkla.
+2. Açılan menüden **"Download ZIP"** seçeneğini seç.
+3. İnen ZIP dosyasını klasöre çıkart (Masaüstüne çıkarabilirsin).
+
+### Adım 3: Siyah Ekranı (Terminal) Açma
+1. Projeyi çıkardığın klasörün içine gir. (İçinde `manage.py`, `README.md` gibi dosyalar olmalı).
+2. Klasör açıkken, yukarıdaki dosya yolu çubuğuna (örneğin "C:\Users\Masaüstü\campus-exchange" yazan yere) bir kere tıkla.
+3. O yazıyı silip yerine **`cmd`** yaz ve Enter'a bas. Karşına siyah bir komut ekranı açılacak.
+
+### Adım 4: Gerekli Paketleri Yükleme
+Açılan siyah ekrana sırasıyla şu komutları kopyala yapıştır ve her birinden sonra Enter'a basıp işlemin bitmesini bekle:
+
+1. Sanal ortam (bir nevi özel bir kutu) oluşturuyoruz:
+   ```bash
+   python -m venv venv
+   ```
+2. O oluşturduğumuz kutunun içine giriyoruz:
+   *(Windows için)*
+   ```bash
+   .\venv\Scripts\activate
+   ```
+   *(Eğer Mac kullanıyorsan şunu yaz: `source venv/bin/activate`)*
+   *(Bunu yazınca satırın başında `(venv)` yazısı çıkmalı)*
+
+3. Gerekli kütüphaneleri internetten indiriyoruz:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Veritabanını (bilgilerin tutulduğu tabloyu) hazırlıyoruz:
+   ```bash
+   python manage.py migrate
+   ```
+
+### Adım 5: Siteyi Çalıştırma! 🚀
+Her şey hazır! Şimdi tek yapman gereken siteyi yayına almak.
+Aynı siyah ekrana son olarak şu komutu yaz:
+```bash
+python manage.py runserver
+```
+
+Ekranda yazılar akacak ve alt kısımlarda `Starting development server at http://127.0.0.1:8000/` gibi bir yazı göreceksin.
+
+Artık Google Chrome veya Safari'yi açıp adres çubuğuna şunu yazabilirsin:
+👉 **http://127.0.0.1:8000/**
+
+Tebrikler! Siten karşında. Gönlünce üye olup ilan açabilirsin. Siyah ekranı kapattığında site de kapanır. Tekrar girmek istersen sadece `Adım 3` ve `Adım 5`i yapman yeterli.
