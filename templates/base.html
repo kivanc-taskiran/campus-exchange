@@ -1,90 +1,138 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Campus Exchange{% endblock %}</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <style>
-        body { background-color: #f8f9fa; }
-        .navbar-brand { font-weight: bold; color: #0d6efd !important; }
-        .card { border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: transform 0.2s; }
-        .card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .item-img { height: 200px; object-fit: cover; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Campus Exchange{% endblock %}</title>
+  <meta name="description" content="Kampüs öğrencileri için ikinci el alışveriş platformu">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <style>
+    body { background-color: #f4f6fb; font-family: 'Segoe UI', sans-serif; }
+    .navbar { border-bottom: 2px solid #e8eaf0; }
+    .navbar-brand { font-weight: 800; color: #0d6efd !important; font-size: 1.3rem; letter-spacing: -0.5px; }
+    .card { border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.07); transition: transform 0.2s, box-shadow 0.2s; border-radius: 12px; }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+    .item-img { height: 200px; object-fit: cover; border-radius: 12px 12px 0 0; }
+    .badge { font-weight: 600; }
+    /* Mesaj input */
+    #message-area::-webkit-scrollbar { width: 5px; }
+    #message-area::-webkit-scrollbar-track { background: #f1f1f1; }
+    #message-area::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 10px; }
+  </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'index' %}">
-                <i class="bi bi-box-seam"></i> Campus Exchange
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'index' %}">All Items</a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'item_create' %}">
-                                <i class="bi bi-plus-circle"></i> Add Item
-                            </a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                {{ user.username }}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <form action="{% url 'logout' %}" method="post" class="d-inline">
-                                        {% csrf_token %}
-                                        <button type="submit" class="dropdown-item">Logout</button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-primary btn-sm mt-1 ms-2" href="{% url 'register' %}">Sign Up</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </nav>
-
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
     <div class="container">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      <a class="navbar-brand" href="{% url 'index' %}">
+        <i class="bi bi-box-seam"></i> Campus Exchange
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'index' %}">
+              <i class="bi bi-grid me-1"></i>Tüm İlanlar
+            </a>
+          </li>
+        </ul>
+        <ul class="navbar-nav align-items-center gap-1">
+          {% if user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'item_create' %}">
+                <i class="bi bi-plus-circle-fill text-primary me-1"></i>İlan Ekle
+              </a>
+            </li>
+
+            <!-- Mesajlar linki + okunmamış sayısı -->
+            <li class="nav-item">
+              <a class="nav-link position-relative" href="{% url 'inbox' %}">
+                <i class="bi bi-chat-dots me-1"></i>Mesajlar
+                <!-- Okunmamış badge: context processor olmadan basit kontrol -->
+                {% with unread_msgs=user.buying_conversations.all %}
+                {% endwith %}
+              </a>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle d-flex align-items-center gap-2"
+                 href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                     style="width:30px;height:30px;font-size:0.85rem;font-weight:bold;">
+                  {{ user.username|make_list|first|upper }}
                 </div>
-            {% endfor %}
-        {% endif %}
-
-        {% block content %}
-        {% endblock %}
+                {{ user.username }}
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                <li>
+                  <span class="dropdown-item-text text-muted small">
+                    <i class="bi bi-person me-1"></i>{{ user.username }}
+                  </span>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'inbox' %}">
+                    <i class="bi bi-inbox me-2"></i>Gelen Kutusu
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'item_create' %}">
+                    <i class="bi bi-plus-circle me-2"></i>İlan Ekle
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="dropdown-item text-danger">
+                      <i class="bi bi-box-arrow-right me-2"></i>Çıkış Yap
+                    </button>
+                  </form>
+                </li>
+              </ul>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'login' %}">Giriş Yap</a>
+            </li>
+            <li class="nav-item">
+              <a class="btn btn-primary btn-sm ms-2" href="{% url 'register' %}">Kayıt Ol</a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
     </div>
+  </nav>
 
-    <footer class="text-center text-muted mt-5 py-4 bg-white border-top">
-        <div class="container">
-            <small>&copy; 2026 Campus Exchange. Created for Django Term Project.</small>
+  <div class="container">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-    </footer>
+      {% endfor %}
+    {% endif %}
 
-    <!-- Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block content %}{% endblock %}
+  </div>
+
+  <footer class="text-center text-muted mt-5 py-4 bg-white border-top">
+    <div class="container">
+      <small>
+        <i class="bi bi-box-seam me-1 text-primary"></i>
+        <strong>Campus Exchange</strong> &copy; 2026 —
+        Django Term Project &nbsp;|&nbsp;
+        <i class="bi bi-cash-coin text-success me-1"></i>Yalnızca Nakit Ödeme
+      </small>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

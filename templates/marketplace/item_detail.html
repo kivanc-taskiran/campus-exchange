@@ -3,100 +3,161 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-md-8">
-        <div class="card mb-4">
-            {% if item.image %}
-                <img src="{{ item.image.url }}" class="card-img-top" alt="{{ item.title }}" style="max-height: 400px; object-fit: contain; background-color: #f8f9fa;">
+  <!-- Sol: İlan detayı -->
+  <div class="col-md-8">
+    <div class="card mb-4">
+      {% if item.image %}
+        <img src="{{ item.image.url }}" class="card-img-top" alt="{{ item.title }}"
+             style="max-height: 420px; object-fit: contain; background-color: #f8f9fa;">
+      {% endif %}
+      <div class="card-body">
+
+        <!-- Satıldı bandı -->
+        {% if item.is_sold %}
+        <div class="alert alert-warning d-flex align-items-center mb-3">
+          <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+          <strong>Bu ürün satılmıştır.</strong>
+        </div>
+        {% endif %}
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="card-title mb-0">{{ item.title }}</h2>
+          <h3 class="mb-0 {% if item.is_sold %}text-muted text-decoration-line-through{% else %}text-success{% endif %}">
+            {% if item.price == 0 %}
+              <i class="bi bi-arrow-left-right"></i> Takas
+            {% else %}
+              {{ item.price }} ₺
             {% endif %}
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h2 class="card-title mb-0">{{ item.title }}</h2>
-                    <h3 class="text-success mb-0">
-                        {% if item.price == 0 %}
-                            <i class="bi bi-arrow-left-right"></i> For Exchange
-                        {% else %}
-                            ${{ item.price }}
-                        {% endif %}
-                    </h3>
-                </div>
-                
-                <p class="text-muted mb-4">
-                    <span class="badge bg-secondary me-2">{{ item.category.name }}</span>
-                    <i class="bi bi-clock"></i> Posted on {{ item.created_at|date:"F d, Y" }} by <strong>{{ item.owner.username }}</strong>
-                </p>
-                
-                <h5>Description</h5>
-                <p class="card-text" style="white-space: pre-wrap;">{{ item.description }}</p>
-                
-                {% if user == item.owner %}
-                <div class="mt-4 pt-3 border-top">
-                    <a href="{% url 'item_edit' item.pk %}" class="btn btn-warning"><i class="bi bi-pencil"></i> Edit</a>
-                    <a href="{% url 'item_delete' item.pk %}" class="btn btn-danger"><i class="bi bi-trash"></i> Delete</a>
-                </div>
-                {% endif %}
-            </div>
+          </h3>
         </div>
-        
-        <!-- Comments Section -->
-        <div class="card mb-4">
-            <div class="card-header bg-white">
-                <h5 class="mb-0">Questions & Comments ({{ comments|length }})</h5>
-            </div>
-            <div class="card-body">
-                {% if user.is_authenticated %}
-                    <form method="post" class="mb-4">
-                        {% csrf_token %}
-                        {{ form|crispy }}
-                        <button type="submit" class="btn btn-primary mt-2">Post Comment</button>
-                    </form>
-                {% else %}
-                    <div class="alert alert-info">
-                        Please <a href="{% url 'login' %}">login</a> to ask a question.
-                    </div>
-                {% endif %}
-                
-                <div class="comments-list">
-                    {% for comment in comments %}
-                        <div class="d-flex mb-3 pb-3 border-bottom">
-                            <div class="flex-shrink-0">
-                                <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                    {{ comment.author.username|make_list|first|upper }}
-                                </div>
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h6 class="mb-1">
-                                    {{ comment.author.username }}
-                                    {% if comment.author == item.owner %}
-                                        <span class="badge bg-info ms-1">Seller</span>
-                                    {% endif %}
-                                    <small class="text-muted ms-2">{{ comment.created_at|timesince }} ago</small>
-                                </h6>
-                                <p class="mb-0">{{ comment.content }}</p>
-                            </div>
-                        </div>
-                    {% empty %}
-                        <p class="text-muted text-center py-3">No comments yet. Be the first to ask a question!</p>
-                    {% endfor %}
-                </div>
-            </div>
+
+        <p class="text-muted mb-4">
+          <span class="badge bg-secondary me-2">{{ item.category.name }}</span>
+          <i class="bi bi-clock"></i> {{ item.created_at|date:"d F Y" }} tarihinde
+          <strong>{{ item.owner.username }}</strong> tarafından eklendi
+        </p>
+
+        <h5>Açıklama</h5>
+        <p class="card-text" style="white-space: pre-wrap;">{{ item.description }}</p>
+
+        <!-- Satıcı için butonlar -->
+        {% if user == item.owner %}
+        <div class="mt-4 pt-3 border-top d-flex gap-2 flex-wrap">
+          {% if not item.is_sold %}
+            <a href="{% url 'item_edit' item.pk %}" class="btn btn-warning">
+              <i class="bi bi-pencil"></i> Düzenle
+            </a>
+            <!-- Satıldı işaretle butonu -->
+            <form method="post" action="{% url 'item_mark_sold' item.pk %}" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-success"
+                      onclick="return confirm('Bu ürünü SATILDI olarak işaretlemek istiyor musun? Nakit ödeme aldıktan sonra tıkla.')">
+                <i class="bi bi-cash-coin"></i> Nakit Alındı — Satıldı İşaretle
+              </button>
+            </form>
+          {% endif %}
+          <a href="{% url 'item_delete' item.pk %}" class="btn btn-danger">
+            <i class="bi bi-trash"></i> Sil
+          </a>
         </div>
+        {% endif %}
+      </div>
     </div>
-    
-    <div class="col-md-4">
-        <!-- Seller Info Card -->
-        <div class="card mb-4">
-            <div class="card-header bg-white">
-                <h5 class="mb-0">Seller Information</h5>
+
+    <!-- Yorumlar -->
+    <div class="card mb-4">
+      <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="bi bi-chat-left-text me-2"></i>Sorular & Yorumlar ({{ comments|length }})</h5>
+      </div>
+      <div class="card-body">
+        {% if user.is_authenticated %}
+          <form method="post" class="mb-4">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-primary mt-2">
+              <i class="bi bi-send"></i> Yorum Gönder
+            </button>
+          </form>
+        {% else %}
+          <div class="alert alert-info">
+            Soru sormak için <a href="{% url 'login' %}">giriş yap</a>.
+          </div>
+        {% endif %}
+
+        <div class="comments-list">
+          {% for comment in comments %}
+          <div class="d-flex mb-3 pb-3 border-bottom">
+            <div class="flex-shrink-0">
+              <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center"
+                   style="width:40px;height:40px;font-weight:bold;">
+                {{ comment.author.username|make_list|first|upper }}
+              </div>
             </div>
-            <div class="card-body text-center">
-                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
-                    {{ item.owner.username|make_list|first|upper }}
-                </div>
-                <h4>{{ item.owner.username }}</h4>
-                <p class="text-muted">Member since {{ item.owner.date_joined|date:"F Y" }}</p>
-                <button class="btn btn-outline-primary w-100" onclick="alert('Messaging system coming soon!')"><i class="bi bi-chat-dots"></i> Message Seller</button>
+            <div class="flex-grow-1 ms-3">
+              <h6 class="mb-1">
+                {{ comment.author.username }}
+                {% if comment.author == item.owner %}
+                  <span class="badge bg-info ms-1">Satıcı</span>
+                {% endif %}
+                <small class="text-muted ms-2">{{ comment.created_at|timesince }} önce</small>
+              </h6>
+              <p class="mb-0">{{ comment.content }}</p>
             </div>
+          </div>
+          {% empty %}
+          <p class="text-muted text-center py-3">Henüz yorum yok. İlk soruyu sen sor!</p>
+          {% endfor %}
         </div>
+      </div>
     </div>
+  </div><!-- /col-md-8 -->
+
+  <!-- Sağ: Satıcı bilgisi + Mesaj -->
+  <div class="col-md-4">
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="bi bi-person-circle me-2"></i>Satıcı Bilgileri</h5>
+      </div>
+      <div class="card-body text-center">
+        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
+             style="width:80px;height:80px;font-size:2rem;font-weight:bold;">
+          {{ item.owner.username|make_list|first|upper }}
+        </div>
+        <h4>{{ item.owner.username }}</h4>
+        <p class="text-muted">{{ item.owner.date_joined|date:"F Y" }}'den beri üye</p>
+
+        {% if user.is_authenticated and user != item.owner and not item.is_sold %}
+          {% if existing_conversation %}
+            <a href="{% url 'conversation_detail' existing_conversation.pk %}"
+               class="btn btn-primary w-100 mb-2">
+              <i class="bi bi-chat-dots-fill"></i> Konuşmaya Devam Et
+            </a>
+          {% else %}
+            <a href="{% url 'start_conversation' item.pk %}"
+               class="btn btn-primary w-100 mb-2">
+              <i class="bi bi-chat-dots"></i> Satıcıya Mesaj At
+            </a>
+          {% endif %}
+        {% elif not user.is_authenticated %}
+          <a href="{% url 'login' %}" class="btn btn-outline-primary w-100 mb-2">
+            <i class="bi bi-box-arrow-in-right"></i> Mesaj için giriş yap
+          </a>
+        {% elif item.is_sold %}
+          <button class="btn btn-secondary w-100 mb-2" disabled>
+            <i class="bi bi-x-circle"></i> Ürün Satıldı
+          </button>
+        {% endif %}
+
+        <!-- Nakit ödeme bilgisi -->
+        {% if not item.is_sold %}
+        <div class="alert alert-light border mt-3 text-start" style="font-size:0.85rem;">
+          <i class="bi bi-cash-coin text-success me-1"></i>
+          <strong>Ödeme: Yalnızca Nakit</strong><br>
+          <span class="text-muted">Satıcıyla mesajlaşarak buluşma yeri ve zamanını belirle, ürünü görüp nakit ödeme yap.</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
